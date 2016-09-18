@@ -172,12 +172,17 @@ namespace Win32Interop.WinHandles
 
         public static void SetWindowXY(this WindowHandle windowHandle, int x, int y)
         {
-            NativeMethods.SetWindowPos(windowHandle.RawPtr, 0, x, y, 100, 100, NativeMethods.WindowPosFlags.NOZORDER | NativeMethods.WindowPosFlags.NOSIZE );
+            NativeMethods.SetWindowPos(windowHandle.RawPtr, IntPtr.Zero, x, y, 100, 100, NativeMethods.WindowPosFlags.NOZORDER | NativeMethods.WindowPosFlags.NOSIZE );
         }
 
         public static void SetWindowSize(this WindowHandle windowHandle, int w, int h)
         {
-            NativeMethods.SetWindowPos(windowHandle.RawPtr, 0, 0, 0, w, h, NativeMethods.WindowPosFlags.NOZORDER | NativeMethods.WindowPosFlags.NOMOVE );
+            NativeMethods.SetWindowPos(windowHandle.RawPtr, IntPtr.Zero, 0, 0, w, h, NativeMethods.WindowPosFlags.NOZORDER | NativeMethods.WindowPosFlags.NOMOVE );
+        }
+
+        public static void SetZPosition(this WindowHandle windowHandle, IntPtr p_pos )
+        {
+            NativeMethods.SetWindowPos(windowHandle.RawPtr, p_pos, 0, 0, 0, 0, NativeMethods.WindowPosFlags.NOACTIVATE | NativeMethods.WindowPosFlags.NOSIZE | NativeMethods.WindowPosFlags.NOMOVE);
         }
 
         public static bool GetWindowPlacement(this WindowHandle windowHandle, ref WINDOWPLACEMENT placement)
@@ -199,6 +204,11 @@ namespace Win32Interop.WinHandles
         public static bool ShowWindow(this WindowHandle windowHandle)
         {
             return NativeMethods.ShowWindow(windowHandle.RawPtr, WindowShowStyle.ShowNormal);
+        }
+
+        public static bool RestoreWindow(this WindowHandle windowHandle)
+        {
+            return NativeMethods.ShowWindow(windowHandle.RawPtr, WindowShowStyle.Restore);
         }
     }
 }
