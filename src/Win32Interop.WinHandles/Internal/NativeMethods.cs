@@ -31,6 +31,7 @@ namespace Win32Interop.WinHandles.Internal
     [Flags]
     public enum WindowPosFlags : uint
     {
+        NOACTIVATE = 0x10,
         NOZORDER = 0x4,
         NOMOVE = 0x2,
         NOSIZE = 0x1
@@ -63,8 +64,8 @@ namespace Win32Interop.WinHandles.Internal
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     internal static extern int GetWindowTextLength(IntPtr hWnd);
 
-    [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-    public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, WindowPosFlags wFlags);
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int Y, int cx, int cy, WindowPosFlags wFlags);
 
     /// <summary>
     /// Retrieves the show state and the restored, minimized, and maximized positions of the specified window.
