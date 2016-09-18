@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Win32Interop.WinHandles.Internal;
+using System.Runtime.InteropServices;
 
 namespace Win32Interop.WinHandles
 {
@@ -11,6 +12,12 @@ namespace Win32Interop.WinHandles
   /// </summary>
   public static class TopLevelWindowUtils
   {
+    public enum FindWindowSortType
+    {
+        SortByZIndex,
+        SortByWinHandle
+    };
+
     /// <summary> Gets the WindowHandle to the current foreground window. </summary>
     /// <returns> The foreground window. </returns>
     public static WindowHandle GetForegroundWindow()
@@ -24,9 +31,11 @@ namespace Win32Interop.WinHandles
     ///  arguments are null. </exception>
     /// <param name="windowPredicate"> A predicate which determines if the given
     ///  window should be included in the collection returned. </param>
+    /// <param name="sortType"> Indicate the way in which the returned values
+    ///  should be sorted</param>
     /// <returns> A collection of windows that passed the predicate. </returns>
     [NotNull]
-    public static IEnumerable<WindowHandle> FindWindows(Predicate<WindowHandle> windowPredicate)
+    public static IEnumerable<WindowHandle> FindWindows(Predicate<WindowHandle> windowPredicate, FindWindowSortType sortType = FindWindowSortType.SortByZIndex)
     {
       if (windowPredicate == null)
         throw new ArgumentNullException(nameof(windowPredicate));
@@ -50,6 +59,15 @@ namespace Win32Interop.WinHandles
                                 },
                                 IntPtr.Zero);
 
+      // By default EnumWindows returns windows Z-Order sorted, so no action needed for this sort type
+
+      if ((windows != null) && (sortType == FindWindowSortType.SortByWinHandle))
+      {
+        // Comparing IntPtrs is generally not something to be advised, but in this case sorting
+        //  by window handle means that for a given set of windows this function will always
+        //  return the same result in the same order, regardless of re-arrangement in the Z order.
+        windows.Sort((x, y) => x.RawPtr.ToInt32().CompareTo( y.RawPtr.ToInt32() ));
+      }
       // ReSharper disable once AssignNullToNotNullAttribute
       return windows ?? Enumerable.Empty<WindowHandle>();
     }
