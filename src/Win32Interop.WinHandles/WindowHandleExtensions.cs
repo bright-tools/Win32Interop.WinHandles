@@ -156,15 +156,20 @@ namespace Win32Interop.WinHandles
             return String.Empty;
         }
 
+        private static IntPtr GetProcessHandle(this WindowHandle windowHandle)
+        {
+            uint pid;
+            NativeMethods.GetWindowThreadProcessId(windowHandle.RawPtr, out pid);
+            return NativeMethods.OpenProcess(NativeMethods.ProcessAccessFlags.VMRead | NativeMethods.ProcessAccessFlags.QueryInformation, true, pid);
+        }
+
         /// <summary> Gets the executable associated with the given window handle. </summary>
         /// <param name="windowHandle"> The window handle to act on. </param>
         /// <returns> The executable filename. </returns>
         [NotNull]
         public static string GetWindowExec(this WindowHandle windowHandle)
         {
-            uint pid;
-            NativeMethods.GetWindowThreadProcessId(windowHandle.RawPtr, out pid);
-            IntPtr proc = NativeMethods.OpenProcess(NativeMethods.ProcessAccessFlags.VMRead | NativeMethods.ProcessAccessFlags.QueryInformation, true, pid);
+            IntPtr proc = GetProcessHandle(windowHandle);
             var buff = new StringBuilder(1024);
             NativeMethods.GetModuleFileNameEx(proc, (IntPtr)0, buff, buff.Capacity);
             return buff.ToString();
